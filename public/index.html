@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FrispChat – Sign Up</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #e0e0e0;
+    }
+    .card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 1.8rem;
+    }
+    .logo h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #e94560, #0f3460);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .logo p { color: #aaa; font-size: 0.9rem; margin-top: 4px; }
+    .tabs {
+      display: flex;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 0.65rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #aaa;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(233,69,96,0.25);
+      color: #e94560;
+    }
+    .form-section { display: none; }
+    .form-section.active { display: block; }
+    .form-group { margin-bottom: 1.1rem; }
+    label { display: block; font-size: 0.85rem; color: #bbb; margin-bottom: 5px; }
+    input {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #e94560; }
+    .btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(90deg, #e94560, #c0392b);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .alert {
+      padding: 0.7rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .alert.error { background: rgba(233,69,96,0.18); border: 1px solid rgba(233,69,96,0.4); color: #f88; }
+    .alert.success { background: rgba(39,174,96,0.18); border: 1px solid rgba(39,174,96,0.4); color: #7defa0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <h1>💬 FrispChat</h1>
+      <p>Real-time chat for everyone</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Log In</button>
+      <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- Login Form -->
+    <div class="form-section active" id="section-login">
+      <div class="alert" id="login-alert"></div>
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input id="login-username" type="text" placeholder="Enter your username" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input id="login-password" type="password" placeholder="Enter your password" autocomplete="current-password" required />
+        </div>
+        <button class="btn" type="submit" id="login-btn">Log In</button>
+      </form>
+    </div>
+
+    <!-- Sign Up Form -->
+    <div class="form-section" id="section-signup">
+      <div class="alert" id="signup-alert"></div>
+      <form id="signup-form" onsubmit="handleSignup(event)">
+        <div class="form-group">
+          <label for="signup-username">Username</label>
+          <input id="signup-username" type="text" placeholder="Choose a username (3–30 chars)" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label for="signup-email">Email</label>
+          <input id="signup-email" type="email" placeholder="you@example.com" autocomplete="email" required />
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input id="signup-password" type="password" placeholder="At least 6 characters" autocomplete="new-password" required />
+        </div>
+        <button class="btn" type="submit" id="signup-btn">Create Account</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Redirect if already logged in
+    const existingToken = localStorage.getItem('fc_token');
+    if (existingToken) window.location.href = '/chat.html';
+
+    function switchTab(tab) {
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+      document.getElementById('section-login').classList.toggle('active', tab === 'login');
+      document.getElementById('section-signup').classList.toggle('active', tab === 'signup');
+    }
+
+    function showAlert(id, msg, type) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.className = `alert ${type}`;
+      el.style.display = 'block';
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      btn.disabled = true;
+      btn.textContent = 'Logging in…';
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('login-username').value.trim(),
+            password: document.getElementById('login-password').value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) { showAlert('login-alert', data.error, 'error'); return; }
+        localStorage.setItem('fc_token', data.token);
+        localStorage.setItem('fc_user', JSON.stringify(data.user));
+        window.location.href = '/chat.html';
+      } catch {
+        showAlert('login-alert', 'Network error. Please try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Log In';
+      }
+    }
+
+    async function handleSignup(e) {
+      e.preventDefault();
+      const btn = document.getElementById('signup-btn');
+      btn.disabled = true;
+      btn.textContent = 'Creating account…';
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('signup-username').value.trim(),
+            email: document.getElementById('signup-email').value.trim(),
+            password: document.getElementById('signup-password').value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) { showAlert('signup-alert', data.error, 'error'); return; }
+        localStorage.setItem('fc_token', data.token);
+        localStorage.setItem('fc_user', JSON.stringify(data.user));
+        window.location.href = '/chat.html';
+      } catch {
+        showAlert('signup-alert', 'Network error. Please try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    }
+  </script>
+</body>
+</html>
